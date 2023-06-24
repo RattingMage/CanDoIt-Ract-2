@@ -18,7 +18,7 @@ const Signup = ({ signup, isAuthenticated }) => {
         role: '',
         avatar: '',
         skills: '',
-        experience: '',
+        experience: '0',
         company: ''
     });
 

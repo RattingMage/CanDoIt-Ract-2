@@ -10,13 +10,15 @@ import CardContent from '@mui/material/CardContent';
 import CardActions from '@mui/material/CardActions';
 import Avatar from '@mui/material/Avatar';
 import IconButton from '@mui/material/IconButton';
+import AddCircleIcon from '@mui/icons-material/AddCircle';
 import Typography from '@mui/material/Typography';
 import { red } from '@mui/material/colors';
 import { NumericFormat } from 'react-number-format';
 import FavoriteBorderOutlinedIcon from '@mui/icons-material/FavoriteBorderOutlined';
-import {Button, TextField} from "@mui/material";
+import {Button, List, ListItem, ListItemText, TextField} from "@mui/material";
 import PropTypes from "prop-types";
 import {update_vacancy} from "../actions/vacancy";
+import ExecutorItem from "./ExecutorItem";
 
 const NumericFormatCustom = React.forwardRef(function NumericFormatCustom(
     props,
@@ -55,8 +57,7 @@ const DetailVacancy = ({ user, isAuthenticated, authCheckState, load_user_by_id 
         min_experience: null,
         price: null
     });
-
-
+    const [isExecutor, setIsExecutor] = useState(false)
 
     NumericFormatCustom.propTypes = {
         name: PropTypes.string.isRequired,
@@ -75,6 +76,12 @@ const DetailVacancy = ({ user, isAuthenticated, authCheckState, load_user_by_id 
         });
         setFormData({ ...formData, [event.target.name]: event.target.value })
     };
+
+    function is_executor_in_list(executors, id){
+        executors.forEach((element) => {
+            if (element === id) return setIsExecutor(true);
+        })
+    }
 
     useEffect(() => {
         async function load()  {
@@ -96,6 +103,7 @@ const DetailVacancy = ({ user, isAuthenticated, authCheckState, load_user_by_id 
                         min_experience: res1.data.min_experience,
                         price: res1.data.price
                     })
+                    is_executor_in_list(res1.data.executors, user.id)
                 } catch (err) {
                     setError(error);
                 }
@@ -183,69 +191,80 @@ const DetailVacancy = ({ user, isAuthenticated, authCheckState, load_user_by_id 
     if (isAuthenticated) {
         if (user.email === vacancy.employer) {
             return (
-                <Card sx={{ maxWidth: "100%", padding: "10px" }}>
-                    <CardHeader
-                        avatar={
-                            <Avatar sx={{ bgcolor: red[500] }} aria-label="recipe">
-                                {vacancy.employer[0]}
-                            </Avatar>
-                        }
-                        title={`${vacancy.employer}`}
-                        subheader={`${vacancy.created}`}
-                    />
-                    <CardContent>
-                        <Typography variant="body2" color="text.primary" sx={{ marginBottom: "10px" }}>
-                            <TextField
-                                id="outlined-multiline-static"
-                                label="Text"
-                                name="name"
-                                multiline
-                                fullWidth
-                                rows={2}
-                                defaultValue={vacancy.name}
-                                onChange={e => onChange(e)}
-                            />
-                        </Typography>
-                        <Typography variant="body2" color="text.secondary" sx={{ marginBottom: "10px"}}>
-                            <TextField
-                                id="outlined-multiline-static"
-                                label="Text"
-                                name="text"
-                                multiline
-                                fullWidth
-                                rows={4}
-                                defaultValue={vacancy.text}
-                                onChange={e => onChange(e)}
-                            />
-                        </Typography>
-                        <TextField
-                            label="Price"
-                            value={vacancy.price}
-                            onChange={handleChange}
-                            name="price"
-                            id="formatted-numberformat-input"
-                            InputProps={{
-                                inputComponent: NumericFormatCustom,
-                            }}
-                            variant="standard"
-                            fullWidth
-                            sx={{ marginBottom: "10px" }}
+                <div>
+                    <Card sx={{ maxWidth: "100%", padding: "10px" }}>
+                        <CardHeader
+                            avatar={
+                                <Avatar sx={{ bgcolor: red[500] }} aria-label="recipe">
+                                    {vacancy.employer[0]}
+                                </Avatar>
+                            }
+                            title={`${vacancy.employer}`}
+                            subheader={`${vacancy.created}`}
                         />
-                    </CardContent>
-                    <CardActions sx={{ padding: "10px"}}>
-                        <form onSubmit={e => onUpdate(e)}>
-                            <Button type="submit" variant="contained" color="info">
-                                Изменить
-                            </Button>
-                        </form>
-                        {/*onClick={delete_vacancy()}*/}
-                        <form onSubmit={e => delete_vacancy(e)}>
-                            <Button type="submit" variant="contained" color="error" >
-                                Удалить
-                            </Button>
-                        </form>
-                    </CardActions>
-                </Card>
+                        <CardContent>
+                            <Typography variant="body2" color="text.primary" sx={{ marginBottom: "10px" }}>
+                                <TextField
+                                    id="outlined-multiline-static"
+                                    label="Text"
+                                    name="name"
+                                    multiline
+                                    fullWidth
+                                    rows={2}
+                                    defaultValue={vacancy.name}
+                                    onChange={e => onChange(e)}
+                                />
+                            </Typography>
+                            <Typography variant="body2" color="text.secondary" sx={{ marginBottom: "10px"}}>
+                                <TextField
+                                    id="outlined-multiline-static"
+                                    label="Text"
+                                    name="text"
+                                    multiline
+                                    fullWidth
+                                    rows={4}
+                                    defaultValue={vacancy.text}
+                                    onChange={e => onChange(e)}
+                                />
+                            </Typography>
+                            <TextField
+                                label="Price"
+                                value={vacancy.price}
+                                onChange={handleChange}
+                                name="price"
+                                id="formatted-numberformat-input"
+                                InputProps={{
+                                    inputComponent: NumericFormatCustom,
+                                }}
+                                variant="standard"
+                                fullWidth
+                                sx={{ marginBottom: "10px" }}
+                            />
+                        </CardContent>
+                        <CardActions sx={{ padding: "10px"}}>
+                            <form onSubmit={e => onUpdate(e)}>
+                                <Button type="submit" variant="contained" color="info">
+                                    Изменить
+                                </Button>
+                            </form>
+                            <form onSubmit={e => delete_vacancy(e)}>
+                                <Button type="submit" variant="contained" color="error" >
+                                    Удалить
+                                </Button>
+                            </form>
+                        </CardActions>
+                    </Card>
+                    <div style={{ padding: "10px" }}>
+                        <Typography variant="button" display="block" gutterBottom>
+                            Список откликнувшихся исполнителей
+                        </Typography>
+                        <List sx={{ width: '100%', bgcolor: 'background.paper' }}>
+                            {vacancy.executors.map((value) =>
+                                <ExecutorItem user_id={value} vacancy_id={vacancy.id} exec_id={vacancy.executor[0]}></ExecutorItem>
+                            )}
+                        </List>
+                    </div>
+                </div>
             );
         } else {
             return (
@@ -273,7 +292,7 @@ const DetailVacancy = ({ user, isAuthenticated, authCheckState, load_user_by_id 
                         </Typography>
                     </CardContent>
                     <CardActions sx={{ padding: "10px"}}>
-                        {vacancy.executors.find((i) => i === user.id) !== -1 ? <div>Уже всё</div> : <Button variant="contained" color="success" onClick={add_executor_to_list}>Откликнуться</Button>}
+                        {isExecutor ? <div>Уже всё</div> : <Button variant="contained" color="success" onClick={add_executor_to_list}>Откликнуться</Button>}
                     </CardActions>
                 </Card>
             );
